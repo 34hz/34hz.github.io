@@ -3257,7 +3257,7 @@ blockquote footer cite:before {
   transition: all 0.5s;
 }
 #page-header.full_page {
-  height: 100vh;
+  height: 300px;
   background-attachment: fixed;
 }
 #page-header.full_page #site-info {
@@ -4295,7 +4295,7 @@ _:future,
   position: fixed;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: 9999;
   pointer-events: none;
 }
 .medium-zoom-image--opened {
