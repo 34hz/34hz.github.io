@@ -9,7 +9,7 @@ function Mirror() {
       // url = "域名，带https://协议" + pathname;
       url = "http://didibobo.gitee.io" + pathname; //就跳转到镜像站的同名页面
       window.location.href = url;
-      //window.alert("即将抵达至镜像站");
+      window.alert(pathname);
     }
     else if(hostname === 'didibobo.gitee.io') {
       url = "http://www.34hz.top" + pathname;
