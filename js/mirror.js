@@ -5,10 +5,7 @@ function Mirror() {
     pathname = window.location.pathname;
     hostname = window.location.hostname;
     // if (hostname === '域名，不带https://协议')
-    // if(pathname === '/'){
-    //     url=hostname;
-    //     window.location.href = url;
-    // }
+
     
     if (hostname === 'www.34hz.top') { //如果是主站
       // url = "域名，带https://协议" + pathname;
@@ -21,7 +18,6 @@ function Mirror() {
       url = "http://www.34hz.top" + pathname;
       window.location.href = url;
       //window.alert("即将启程回主站");
-      window.location.reload();
     }
     else {
       window.alert("本地调试，无需跳转");
