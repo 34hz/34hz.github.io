@@ -3181,19 +3181,19 @@ blockquote footer cite:before {
   background-image: url('https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/random.png');
 }
 .GalMenu .ring a:nth-of-type(2) {
-  background-image: url("https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/archive.png");
+  background-image: url('https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@3.3.3_3/galmenu/comment.png');
 }
 .GalMenu .ring a:nth-of-type(3) {
-  background-image: url("https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/tag.png");
+  background-image: url('https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@3.3.3_3/galmenu/tag.png');
 }
 .GalMenu .ring a:nth-of-type(4) {
-  background-image: url("https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/random.png");
+  background-image: url('https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@3.3.3_3/galmenu/random.png');
 }
 .GalMenu .ring a:nth-of-type(5) {
-  background-image: url("https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/link.png");
+  background-image: url('https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@3.3.3_3/galmenu/link.png');
 }
 .GalMenu .ring a:nth-of-type(6) {
-  background-image: url("https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/comment.png");
+  background-image: url('https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@3.3.3_3/galmenu/archive.png');
 }
 .GalMenu .ring a:hover {
   text-shadow: #6cf 1px 0 0, #6cf 0 1px 0, #6cf -1px 0 0, #6cf 0 -1px 0;
