@@ -1,0 +1,341 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unix-c-进程相关 | 34Hz</title><meta name="keywords" content="Linux,Unix,C,笔记"><meta name="author" content="34hz"><meta name="copyright" content="34hz"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="进程创建进程函数原型123#include &lt;unistd.h&gt;pid_t fork(void);pid_t vfork(void); &#x2F;&#x2F;轻量级子进程  成功调用将会在子进程中返回0,在父进程中返回创建出来的子进程PID 失败返回-1;伪代码  函数的调用者可以根据函数返回值的不同,分别为父子进程分配不同的任务,并发执行(多核处理器) 1234567891011121314pid_t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unix-c-进程相关">
+<meta property="og:url" content="http://www.34hz.top/2021/01/13/Unix-c-%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3/index.html">
+<meta property="og:site_name" content="34Hz">
+<meta property="og:description" content="进程创建进程函数原型123#include &lt;unistd.h&gt;pid_t fork(void);pid_t vfork(void); &#x2F;&#x2F;轻量级子进程  成功调用将会在子进程中返回0,在父进程中返回创建出来的子进程PID 失败返回-1;伪代码  函数的调用者可以根据函数返回值的不同,分别为父子进程分配不同的任务,并发执行(多核处理器) 1234567891011121314pid_t">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/0076tTSdgy1gm1w5asvegj32nk1404qr.jpg">
+<meta property="article:published_time" content="2021-01-13T06:25:51.000Z">
+<meta property="article:modified_time" content="2021-01-13T06:26:49.900Z">
+<meta property="article:author" content="34hz">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Unix">
+<meta property="article:tag" content="C">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/0076tTSdgy1gm1w5asvegj32nk1404qr.jpg"><link rel="shortcut icon" href="/img/ico.png"><link rel="canonical" href="http://www.34hz.top/2021/01/13/Unix-c-%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-01-13 14:26:49'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}const fontSizeVal = saveToLocal.get('global-font-size')
+if (fontSizeVal !== undefined) {
+  document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+}})()</script><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><meta name="generator" content="Hexo 5.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/ico.png'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">14</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="http://18554231816.wicp.vip:8096"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="http://18554231816.wicp.vip:7788/"><i class="fa-fw fas fa-cloud"></i><span> Cloud</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="http://18554231816.wicp.vip:8888/"><i class="fa-fw fas fa-heart"></i><span> Index</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://tva1.sinaimg.cn/large/0076tTSdgy1gm1w5asvegj32nk1404qr.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">34Hz</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="http://18554231816.wicp.vip:8096"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="http://18554231816.wicp.vip:7788/"><i class="fa-fw fas fa-cloud"></i><span> Cloud</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="http://18554231816.wicp.vip:8888/"><i class="fa-fw fas fa-heart"></i><span> Index</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Unix-c-进程相关</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-01-13T06:25:51.000Z" title="发表于 2021-01-13 14:25:51">2021-01-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-01-13T06:26:49.900Z" title="更新于 2021-01-13 14:26:49">2021-01-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%AC%94%E8%AE%B0/">笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%AC%94%E8%AE%B0/C/">C</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><h3 id="创建进程"><a href="#创建进程" class="headerlink" title="创建进程"></a>创建进程</h3><h4 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a>函数原型</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">fork</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">vfork</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">//轻量级子进程</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>成功调用将会在子进程中返回0,在父进程中返回创建出来的子进程PID</li>
+<li>失败返回-1;<h4 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h4></li>
+</ul>
+<p><strong>函数的调用者可以根据函数返回值的不同,分别为父子进程分配不同的任务,并发执行(多核处理器)</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pid_t</span> pid=fork();</span><br><span class="line"><span class="comment">//pid_t pid=vfork();</span></span><br><span class="line"><span class="keyword">if</span>(pid == <span class="number">-1</span>)&#123;</span><br><span class="line">    perror(<span class="string">&quot;fork error&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> pid;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(pid == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="comment">//子进程任务</span></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="comment">//父进程任务</span></span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//父子进程都会做</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="fork-失败返回-1的条件"><a href="#fork-失败返回-1的条件" class="headerlink" title="fork() 失败返回-1的条件"></a>fork() 失败返回-1的条件</h4><p>1.系统总线程数达到上限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/sys/kernel/threads-max</span><br></pre></td></tr></table></figure>
+<p>2.系统中总进程数达到上限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ulimit -u</span><br></pre></td></tr></table></figure>
+<h4 id="子进程与父进程的联系"><a href="#子进程与父进程的联系" class="headerlink" title="子进程与父进程的联系"></a>子进程与父进程的联系</h4><ul>
+<li><strong>子进程是父进程的不完全副本</strong>,子进程是的数据区BSS区,堆栈区(包括IO流缓冲区,甚至是命令行参数和环境变量都从父进程拷贝,唯有代码区与父进程共享)</li>
+<li>当<code>fork()</code>函数成功返回了,父子进程就各自独立运行,其被调用度的先后顺序并不确定,在某些版本的UNIX实现上可以保证子进程先被调度,但是再标准上并没有规定这一点.</li>
+<li>当通过<code>fork()</code>创建子进程时,系统内核为父进程维护的文件描述符表,也被复制到子进程的进程表项中,但文件表项并不被复制.例如:在fork()之前父进程如果打开了一个文件,然后创建子进程,这时,在子进程中也可以对该文件进行修改.</li>
+</ul>
+<h4 id="vfork-与fork-的区别"><a href="#vfork-与fork-的区别" class="headerlink" title="vfork()与fork()的区别"></a>vfork()与fork()的区别</h4><ol>
+<li><code>vfork()</code>函数创建的子进程不复制父进程的屋里内存,也不拥有自己的内存映射,而是与父进程共享全部的内存空间</li>
+<li><code>vfork()</code>函数会在创建子进程的同时同时挂起父进程,直到进程终止,或通过<code>exec()</code>函数启动了另一个进程,再恢复父进程的运行</li>
+<li>使用<code>vfork()</code>创建的子进程在退出是不要使用<code>return语句</code>,也不要调用<code>exec()</code>函数,而要调用<code>_exec()</code>函数,以避免对父进程造成不利影响<h5 id="写时拷贝-copy-on-write"><a href="#写时拷贝-copy-on-write" class="headerlink" title="写时拷贝(copy-on-write)"></a>写时拷贝(copy-on-write)</h5>现代版本的UNIX系统通常用写时拷贝技术优化性能,依次避免内存复制所带来的系统开销.例如:通过<code>fork()</code>创建进程时,在初始时,并不复制父进程的物理内存,只复制它的内存映射表即可,<strong>父子进程共享同一个地址空间,直到父子进程中的一个需要写数据时再复制内存</strong>.应用了这种优化机制的<code>fork()</code>函数在性能上并不比<code>vfork()</code>差多少<h4 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h4><h5 id="fork"><a href="#fork" class="headerlink" title="fork()"></a>fork()</h5></li>
+</ol>
+<ul>
+<li>一个进场如果希望创建自己的副本并执行同一份代码,或希望与另一个进程并发的运行,都可以使用<code>fork()</code>函数.</li>
+<li>调用<code>fork()</code>前的代码只有父进程执行,<code>fork()</code>函数成功返回后的代码父子进程都会执行,受逻辑控制(根据返回值的判断)会执行不同的分支<h5 id="vfork"><a href="#vfork" class="headerlink" title="vfork()"></a>vfork()</h5>使用<code>vfork()</code>创建的子进程中调用<code>exec()</code>函数启动另一个进程取代自身,比调用<code>fork()</code>要快,因为少了很多东西的复制</li>
+</ul>
+<h3 id="进程终止"><a href="#进程终止" class="headerlink" title="进程终止"></a>进程终止</h3><h4 id="正常终止-从main函数中返回"><a href="#正常终止-从main函数中返回" class="headerlink" title="正常终止(从main函数中返回)"></a>正常终止(从main函数中返回)</h4><ul>
+<li>从main函数<code>return</code>可令进程终止,进程是内存中代码和数据的集合,执行代码的过程即线程,每个进程可以有一个到多个线程,单至少要有一个主线程,每个线程都可以被看做是一个独立的执行过程中调用了一个特殊的函数,即线程过程函数.线程开始,线程过程函数被调用,线程过程函数一旦返回,线程即告终止.<br>缺省情况下,进程主线程的线程过程函数就是main函数,main函数一旦返回,主线程即终止,主线程一旦终止,进程即终止,进程中如果还有其它线程,其它线程也随之终止.<br>main函数的返回值(进程退出码),父进程可以在回收子进程的同时获得其退出码,并根据退出码判断该子进程终止的原因.</li>
+<li>pthread_exit()退出<br>如果在主线程中调用pthread_exit()函数,主线程即终止,进程也就终止了</li>
+<li>exit()/_exit()/Exit() 的调用<br>在程序宏的任何线程中调用了<code>exit()</code> <code>_exit()</code> <code>Exit()</code>都会导致进程终止</li>
+</ul>
+<h5 id="进程退出后的资源处理"><a href="#进程退出后的资源处理" class="headerlink" title="进程退出后的资源处理"></a>进程退出后的资源处理</h5><p>进程一旦被终止,被终止进程在用户空间所持有的资源会被自动释放,如代码区,数据区,堆栈区等,单内核空间中与该进程有关的资源,如进程表项,文件描述符表等,未必会被立即被释放.</p>
+<h5 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="comment">// 正常终止调用进程</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">exit</span><span class="params">(<span class="keyword">int</span> status)</span></span>;<span class="comment">//status:退出码</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 无论是调用exit()函数还是从main函数中返回,都会在进程被终止之前,调用预先注册好的退出处理函数.</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">atexit</span><span class="params">(<span class="keyword">void</span> (*function)(<span class="keyword">void</span>))</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">on_exit</span><span class="params">(<span class="keyword">void</span> (*function)(<span class="keyword">int</span>, <span class="keyword">void</span>*),<span class="keyword">void</span>* arg)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不会调用退出处理函数</span></span><br><span class="line"><span class="keyword">void</span> _Exit(<span class="keyword">int</span> status);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">void</span> _exit(<span class="keyword">int</span> status);</span><br></pre></td></tr></table></figure>
+<h5 id="进程退出函数调用过程"><a href="#进程退出函数调用过程" class="headerlink" title="进程退出函数调用过程"></a>进程退出函数调用过程</h5><ol>
+<li>main函数中<code>return</code>返回</li>
+<li><code>exit()</code></li>
+<li>调用事先通过<code>atexit()</code>或<code>on_exit()</code>注册的退出处理函数 </li>
+</ol>
+<p><strong>冲刷并关闭所有仍处于打开状态的标准I/O流-&gt;删除所有通过<code>tmpfile()</code>创建的临时文件</strong><br>4. 调用<code>_exit()</code><br><strong>关闭所有仍处于打开状态的文件描述符-&gt;将调用进程的所有子进程托付给init进程收养-&gt;向调用进程的父进程发送<code>SIGCHID(17)</code>信号</strong></p>
+<h4 id="进程的异常终止"><a href="#进程的异常终止" class="headerlink" title="进程的异常终止"></a>进程的异常终止</h4><ul>
+<li>在主线程外部,通过<code>pthread_cancel()</code>函数将主线程取消掉,进程即将被终止</li>
+<li>当进程执行了某些在操作系统看来具有危险性的操作,或系统本身发生了某种故障或意外,内核向相关进程发送特定的信号.如果进程无意针对所收到的信号采取补救措施,那么内核按缺省的方式将进程杀死,并视情况生成转储文件(core)以备份是否分析,俗称 <strong>吐核</strong></li>
+<li>人为触发以下信号,杀死进程<code>Ctrl+c</code> <code>Ctrl+\</code></li>
+<li>通过调用<code>abort()</code>函数,自杀行为<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">abort</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"><span class="comment">//abort()函数首先解除调用进程对SIGABORT(6)信号的阻塞,然后向调用进程发送SIGABORT(6).其结果就是令调用进程异常终止</span></span><br><span class="line"><span class="comment">//如果调用进程事先对SIGABORT(6)信号设置为忽略或者进行捕获,abort()函数会先将对SIGABORT(6)信号的处理方式恢复为默认方式,即终止进程再发信号</span></span><br><span class="line"><span class="comment">//一般是进程自己给自己发,进程自杀的方式 </span></span><br></pre></td></tr></table></figure>
+<h5 id="常见错误信号"><a href="#常见错误信号" class="headerlink" title="常见错误信号:"></a>常见错误信号:</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">SIGILL(4) //进程试图执行非法指令</span><br><span class="line">SIGBUS(7) //硬件或对齐错误</span><br><span class="line">SIGFPE(8) //浮点数计算异常</span><br><span class="line">SIGSEGV(11) //无效内存访问(段错误)</span><br><span class="line">SIGPIPE(13) //向一个无读取进程的管道做写入</span><br><span class="line">SIGSTKFLT(16) //浮点数协处理器发生栈溢出</span><br><span class="line">SIGXFSZ(25) //文件资源超限</span><br><span class="line">SIGPWR(30) //主电源断电</span><br><span class="line">SIGSYS(31) //试图执行无效系统调用</span><br><span class="line">SIGINT(2) //用户中断符(Ctrl+C)</span><br><span class="line">SIGQUIT(3) //终端退出符(Ctrl+\),产生核心转储文件</span><br><span class="line">SIGKILL(9) //不能被捕获也不能被忽略,一定终止进程(要有权限) 命令Kill -9 pid</span><br><span class="line">SIGTERM(15) //可被捕获也可被忽略,默认终止进程Kill pid</span><br><span class="line">SIGABORT(6) //通过abort()函数触发</span><br></pre></td></tr></table></figure>
+<h3 id="回收子进程-僵尸"><a href="#回收子进程-僵尸" class="headerlink" title="回收子进程(僵尸)"></a>回收子进程(僵尸)</h3>一方面通过回收子进程的僵尸避免资源的过度消耗,另一方面还可以通过子进程僵尸中的某些信息,获得子进程终止的原因.<h4 id="相关函数-1"><a href="#相关函数-1" class="headerlink" title="相关函数"></a>相关函数</h4><h5 id="等待并回收任意子进程-阻塞"><a href="#等待并回收任意子进程-阻塞" class="headerlink" title="等待并回收任意子进程(阻塞)"></a>等待并回收任意子进程(阻塞)</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">wait</span><span class="params">(<span class="keyword">int</span>* status)</span></span>;</span><br><span class="line"><span class="comment">//函数成功返回所回收的子进程的PID,失败返回-1,当前进程中没有要回收的子进程函数也会返回-1.并置errno为ECHILD</span></span><br><span class="line"><span class="comment">//通过status参数输出子进程的退出状态,如果不关注其退出状态可置为空指针</span></span><br></pre></td></tr></table></figure></li>
+<li>父进程在创建了若干个子进程以后,调用<code>wait()</code>函数,若所有子进程都在运行,则阻塞,直到所有子进程终止;</li>
+<li>若有一个子进程已终止,则返回该子进程的PID并通过status参数(参数非NULL),输出其状态;</li>
+<li>若没有要等待的子进程(没有僵尸),函数会返回-1,并置errno为ECHILD</li>
+</ul>
+<h5 id="分析进程的终止状态-status参数"><a href="#分析进程的终止状态-status参数" class="headerlink" title="分析进程的终止状态(status参数)"></a>分析进程的终止状态(status参数)</h5><p><code>WIFEXITED(status)</code> </p>
+<ul>
+<li>若子进程正常终止,值为1;<br><code>WEXITSTATUS(status)</code> status的二进制数位的低8位即退出码<br>main函数的返回值和<code>exit()</code>/<code>_exit()</code>/<code>_Exit()</code>函数的参数最好不要超过<code>[-128,127]</code>区间所表示的范围</li>
+<li>若子进程异常终止,值为0;<br><code>WTERMSIG(status)</code> status的二进制数位的高24位为导致子进程异常终止的信号</li>
+</ul>
+<h5 id="等待并回收任意或特定子进程-可选择是否阻塞"><a href="#等待并回收任意或特定子进程-可选择是否阻塞" class="headerlink" title="等待并回收任意或特定子进程(可选择是否阻塞)"></a>等待并回收任意或特定子进程(可选择是否阻塞)</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">waitpid</span><span class="params">(<span class="keyword">pid_t</span> pid, <span class="keyword">int</span>* status, <span class="keyword">int</span> options)</span></span>;</span><br><span class="line"><span class="comment">//函数成功返回所回收的子进程的PID或0,失败返回-1;</span></span><br></pre></td></tr></table></figure>
+<p><strong>参数</strong><br><strong>pid 等待的特定的进程的PID可选以下值</strong></p>
+<ul>
+<li><code>pid&lt;-1</code> 等待并回收特定进程组(<code>|pid|</code>)的任意子进程<br>回收以该<code>pid</code>绝对值的进程ID为根进程的所有相关进程</li>
+<li><code>pid=-1</code> 等待回收任意子进程(等价于<code>wait()</code>函数)<br>回收所有调用进程所创建的子进程</li>
+<li><code>pid=0</code> 等待并回收与调用进程处在同一进程组的任意子进程</li>
+<li><code>pid&gt;0</code> 等待并回收由<code>pid</code>所标识的特定子进程</li>
+</ul>
+<p><strong>status 输出子进程的退出状态,可置为NULL</strong><br><strong>options -可选标志,可取以下值</strong></p>
+<ul>
+<li><code>options=0</code> 阻塞模式,若所等子进程仍在运行,则阻塞,直到其终止</li>
+<li><code>WNOHANG</code> 非阻塞模式,若所等子进程仍在运行,返回0</li>
+</ul>
+<h3 id="创建新进程-exec函数族"><a href="#创建新进程-exec函数族" class="headerlink" title="创建新进程(exec函数族)"></a>创建新进程(exec函数族)</h3><h4 id="exec与fork区别"><a href="#exec与fork区别" class="headerlink" title="exec与fork区别"></a>exec与fork区别</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">A[父进程1000] --&gt; B(fork) --&gt; C[父进程1000] </span><br><span class="line">B(fork) --&gt; D[子进程1001]</span><br><span class="line">A[父进程1000] --&gt; E(exec) --&gt; F[新进程1000]</span><br></pre></td></tr></table></figure>
+<p><code>exec()</code>与<code>fork()</code>或<code>vfork()</code>不同,<code>exec()</code>函数不是调用进程的子进程,而是<strong>创建一个新的进程取代调用进程自身</strong>,新进程会用自己的地址空间覆盖调用进程的地址空间,但是进程的<code>PID</code>保持不变</p>
+<h4 id="exec创建新进程的变化与延续"><a href="#exec创建新进程的变化与延续" class="headerlink" title="exec创建新进程的变化与延续"></a>exec创建新进程的变化与延续</h4><p>调用exec函数不仅改变了调用进程的地址空间和进程映像,<strong>调用进程的一些属性也会发生变化</strong>,有一些属性也会被继承</p>
+<h5 id="变化的属性"><a href="#变化的属性" class="headerlink" title="变化的属性"></a>变化的属性</h5><ul>
+<li>任何处于阻塞状态的信号都会丢失</li>
+<li>任何被设置为捕获的信号都会还原为默认操作</li>
+<li>所有有关线程属性的设置会还原为缺省值</li>
+<li>所有当前进程的统计信息全部复位</li>
+<li>所有与当前进程内存相关的任何数据都会丢失,包括内存映射文件</li>
+<li>所有标准库在用户空间维护的一切数据结构(如通过<code>atexit()</code>/<code>on_exit()</code>注册的退出处理函数)都会丢失<h5 id="继承的属性"><a href="#继承的属性" class="headerlink" title="继承的属性"></a>继承的属性</h5></li>
+<li>PID PPID 不变</li>
+<li>实际用户ID和实际组ID不变</li>
+<li>进程优先级不变</li>
+<li>默认状态下文件描述符是被继承的(已经打开的文件描述符就不用重新打开了),除非通过<code>fcntl()</code>为文件描述符设置了<code>FD_CLOSEEXEC</code>  的标志位,新进程中会关闭已经打开文件描述符<h4 id="exec-vfork模式"><a href="#exec-vfork模式" class="headerlink" title="exec + vfork模式"></a>exec + vfork模式</h4>如果既想创建新进程,同时又希望原来的进程继续存在,则可以用<code>vfork()</code>+<code>exec()</code>模式,即在<code>vfork()</code>所创建的子进程中调用<code>exec()</code>函数,新进程取代了子进程,但是其父进程依然存在<br>这样就创建了两个代码区完全不同单有父子关系的两个进程<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">A[父进程1000] --&gt; B(vfork&#x2F;fork) --&gt;D(父进程1000)</span><br><span class="line">B(vfork&#x2F;fork) --&gt;C(子进程1001) --&gt; E(exec) --&gt; F[新进程1001]</span><br></pre></td></tr></table></figure>
+<h4 id="相关函数-2"><a href="#相关函数-2" class="headerlink" title="相关函数"></a>相关函数</h4><code>exec()</code>函数族一共六个函数,他们功能是一样的,用法也接近,只是参数的形式和数量略有不同<br>作用都是创建一个新的进程取代调用进程自身,新的进程会用自己的全部地址空间,覆盖调用进程的地址空间,但<code>PID</code>保持不变</li>
+</ul>
+<p><strong>返回值</strong><br>成功不返回;<br>出错返回-1</p>
+<h5 id="execl"><a href="#execl" class="headerlink" title="execl()"></a>execl()</h5><p><strong>描述</strong></p>
+<ul>
+<li>以文件路径找文件</li>
+<li>以变长列表给参数<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">execl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* path,<span class="keyword">const</span> <span class="keyword">char</span>* arg,...,<span class="literal">NULL</span>)</span></span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>参数</strong></p>
+<ul>
+<li><code>path</code> 可执行文件路径</li>
+<li><code>arg</code> 命令行参数,以NULL结束</li>
+</ul>
+<p><strong>调用格式</strong><br><code>execl(&quot;/bin/ls&quot;,&quot;ls&quot;,&quot;-l&quot;,&quot;NULL&quot;);</code></p>
+<h5 id="execlp"><a href="#execlp" class="headerlink" title="execlp()"></a>execlp()</h5><p><strong>描述</strong></p>
+<ul>
+<li>以文件名称找文件</li>
+<li>以变长列表给参数<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">execlp</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* file,<span class="keyword">const</span> <span class="keyword">char</span>* arg,...,<span class="literal">NULL</span>)</span></span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>参数</strong></p>
+<ul>
+<li><code>file</code> 可执行文件名称,根据PATH来找文件名称</li>
+<li><code>arg</code>命令行参数,以NULL结束</li>
+</ul>
+<h5 id="execle"><a href="#execle" class="headerlink" title="execle()"></a>execle()</h5><p><strong>描述</strong></p>
+<ul>
+<li>以文件路径找文件</li>
+<li>以变长列表给参数</li>
+<li>以给定环境变量为PATH<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">execle</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* path,<span class="keyword">const</span> <span class="keyword">char</span>* arg,<span class="keyword">char</span>* <span class="keyword">const</span> envp[])</span></span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>参数</strong><br><code>path</code> 可执行文件路径<br><code>arg</code> 命令行参数,以NULL结束<br><code>envp[]</code>    环境变量数组,以NULL结尾,附带环境变量,以指定的环境变量数组为环境变量,新进程拥有独立的环境变量</p>
+<p><strong>调用格式</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span>* envp[] = &#123;<span class="string">&quot;NAME=lisi&quot;</span>,<span class="string">&quot;EMALE=lisi@hz.cn&quot;</span>,<span class="literal">NULL</span>&#125;;</span><br><span class="line">execle(<span class="string">&quot;./argenv&quot;</span>,<span class="string">&quot;argenv&quot;</span>,<span class="string">&quot;hello&quot;</span>,<span class="string">&quot;world&quot;</span>,<span class="literal">NULL</span>,envp);</span><br></pre></td></tr></table></figure>
+<h5 id="execv"><a href="#execv" class="headerlink" title="execv()"></a>execv()</h5><p><strong>描述</strong></p>
+<ul>
+<li>以文件路径找文件</li>
+<li>以数组形式给参数<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">execv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* path,<span class="keyword">char</span>* <span class="keyword">const</span> argv[])</span></span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>参数</strong></p>
+<ul>
+<li><code>path</code>可执行文件路径</li>
+<li><code>argv[]</code>命令行参数数组,以NULL结尾</li>
+</ul>
+<p><strong>调用格式</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span>* <span class="keyword">const</span> argv[<span class="number">3</span>] = &#123;<span class="string">&quot;ls&quot;</span>,<span class="string">&quot;-l&quot;</span>,<span class="literal">NULL</span>&#125;;</span><br><span class="line">execv(<span class="string">&quot;/bin/ls&quot;</span>,argv);</span><br></pre></td></tr></table></figure>
+<h5 id="execvp"><a href="#execvp" class="headerlink" title="execvp()"></a>execvp()</h5><p><strong>描述</strong></p>
+<ul>
+<li>以文件名称找文件</li>
+<li>以数组形式给参数<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">execvp</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* file,<span class="keyword">char</span>* <span class="keyword">const</span> argv[])</span></span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>参数</strong></p>
+<ul>
+<li><code>file</code> 可执行文件名称,根据环境变量PATH来找文件名称</li>
+<li><code>argv[]</code>命令行参数数组,以NULL结束</li>
+</ul>
+<p><strong>调用格式</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span>* <span class="keyword">const</span> argv[<span class="number">3</span>] = &#123;<span class="string">&quot;ls&quot;</span>,<span class="string">&quot;-l&quot;</span>,<span class="literal">NULL</span>&#125;;</span><br><span class="line">execvp(argv[<span class="number">0</span>],argv);<span class="comment">//要保证argv[0],即ls要在环境变量中</span></span><br></pre></td></tr></table></figure>
+<h5 id="execve"><a href="#execve" class="headerlink" title="execve()"></a>execve()</h5><p><strong>描述</strong></p>
+<ul>
+<li>以文件路径找文件</li>
+<li>以数组形式给参数</li>
+<li>以给定环境变量为PATH<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">execve</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* path, <span class="keyword">char</span>* <span class="keyword">const</span> argv[],<span class="keyword">char</span>* envp[])</span></span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>参数</strong></p>
+<ul>
+<li><code>path</code>可执行文件路径</li>
+<li><code>argv[]</code>命令行参数数组,以NULL结尾</li>
+<li><code>envp[]</code>环境变量数组,以NULL结尾,附带环境变量,以指定的环境变量数组为环境变量,新进程拥有独立的环境变量</li>
+</ul>
+<p><strong>调用格式</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span>* <span class="keyword">const</span> argv[<span class="number">3</span>] = &#123;<span class="string">&quot;ls&quot;</span>,<span class="string">&quot;-l&quot;</span>,<span class="literal">NULL</span>&#125;;</span><br><span class="line"><span class="keyword">char</span>* envp[] = &#123;<span class="string">&quot;NAME=lisi&quot;</span>,<span class="string">&quot;EMALE=lisi@hz.cn&quot;</span>,<span class="literal">NULL</span>&#125;; </span><br><span class="line">execve(<span class="string">&quot;./argenv&quot;</span>,argv,envp);</span><br></pre></td></tr></table></figure>
+<h3 id="system"><a href="#system" class="headerlink" title="system()"></a>system()</h3><p>执行shell指令</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">system</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* command)</span></span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>返回值</strong></p>
+<ul>
+<li>成功返回command进程终止状态;</li>
+<li>失败返回-1</li>
+</ul>
+<p><strong>参数</strong><br>command:命令字符串</p>
+<ul>
+<li>若取NULL,返回非0,表示Shell可用;</li>
+<li>返回0,表示不可用.</li>
+</ul>
+<p><strong>调用格式</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">status = system(<span class="string">&quot;ls -l&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p><strong>system简化实现</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * cmd: aaa bbb ccc ddd</span></span><br><span class="line"><span class="comment"> *      ^  0   0   0   0</span></span><br><span class="line"><span class="comment"> *    token</span></span><br><span class="line"><span class="comment"> *          ^</span></span><br><span class="line"><span class="comment"> *        token</span></span><br><span class="line"><span class="comment"> *              ^</span></span><br><span class="line"><span class="comment"> *            token</span></span><br><span class="line"><span class="comment"> *                  ^</span></span><br><span class="line"><span class="comment"> *                token</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *         +----+</span></span><br><span class="line"><span class="comment"> * argv -&gt; | *  | -&gt; aaa</span></span><br><span class="line"><span class="comment"> *         +----+</span></span><br><span class="line"><span class="comment"> *         | *  | -&gt; bbb</span></span><br><span class="line"><span class="comment"> *         +----+</span></span><br><span class="line"><span class="comment"> *         | *  | -&gt; ccc</span></span><br><span class="line"><span class="comment"> *         +----+</span></span><br><span class="line"><span class="comment"> *         | *  | -&gt; ddd</span></span><br><span class="line"><span class="comment"> *         +----+</span></span><br><span class="line"><span class="comment"> *         |NULL|</span></span><br><span class="line"><span class="comment"> *         +----+</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">char</span>** <span class="title">getargv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* command)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">char</span> cmd[<span class="built_in">strlen</span>(command) + <span class="number">1</span>];</span><br><span class="line">    <span class="built_in">strcpy</span>(cmd, command);</span><br><span class="line">    <span class="keyword">int</span> argc = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">char</span>** argv = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">char</span>* token;</span><br><span class="line">    <span class="keyword">char</span>* sep = <span class="string">&quot; \t\n&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (token = strtok(cmd, sep);</span><br><span class="line">        token; token = strtok(<span class="literal">NULL</span>, sep)) &#123;</span><br><span class="line">        argv = <span class="built_in">realloc</span>(argv,</span><br><span class="line">            (++argc) * <span class="keyword">sizeof</span>(*argv));</span><br><span class="line">        argv[argc<span class="number">-1</span>] = <span class="built_in">malloc</span>((<span class="built_in">strlen</span>(</span><br><span class="line">            token) + <span class="number">1</span>) * <span class="keyword">sizeof</span>(*token));</span><br><span class="line">        <span class="built_in">strcpy</span>(argv[argc<span class="number">-1</span>], token);</span><br><span class="line">    &#125;</span><br><span class="line">    argv = <span class="built_in">realloc</span>(argv,</span><br><span class="line">            (++argc) * <span class="keyword">sizeof</span>(*argv));</span><br><span class="line">    argv[argc<span class="number">-1</span>] = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">return</span> argv;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">freeargv</span><span class="params">(<span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">size_t</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; argv[i]; ++i)</span><br><span class="line">        <span class="built_in">free</span>(argv[i]);</span><br><span class="line">    <span class="built_in">free</span>(argv);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">mysystem</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* command)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">char</span>** argv = getargv(command);</span><br><span class="line">    <span class="keyword">pid_t</span> pid = vfork();</span><br><span class="line">    <span class="keyword">if</span> (pid ==  <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;vfork&quot;</span>);</span><br><span class="line">        freeargv(argv);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (pid == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">if</span> (execvp(argv[<span class="number">0</span>], argv) == <span class="number">-1</span>) &#123;</span><br><span class="line">            perror(<span class="string">&quot;execvp&quot;</span>);</span><br><span class="line">            _exit(<span class="number">127</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">int</span> status;</span><br><span class="line">    <span class="keyword">if</span> (waitpid(pid, &amp;status, <span class="number">0</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        freeargv(argv);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    freeargv(argv);</span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    char** argv = getargv(</span></span><br><span class="line"><span class="comment">        &quot;aaa    bbb     ccc   ddd&quot;);</span></span><br><span class="line"><span class="comment">    char** pp = argv;</span></span><br><span class="line"><span class="comment">    while(pp &amp;&amp; *pp)</span></span><br><span class="line"><span class="comment">        printf(&quot;%s\n&quot;, *pp++);</span></span><br><span class="line"><span class="comment">    freeargv(argv);</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">int</span> status;</span><br><span class="line">    <span class="keyword">if</span> ((status = mysystem(<span class="string">&quot;ls -l /none&quot;</span>)) == <span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, WEXITSTATUS(status));</span><br><span class="line">    <span class="keyword">if</span> ((status = mysystem(<span class="string">&quot;ps u&quot;</span>)) == <span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, WEXITSTATUS(status));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">34hz</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://www.34hz.top/2021/01/13/Unix-c-%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3/">http://www.34hz.top/2021/01/13/Unix-c-进程相关/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://www.34hz.top" target="_blank">34Hz</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Unix/">Unix</a><a class="post-meta__tags" href="/tags/C/">C</a><a class="post-meta__tags" href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a></div><div class="post_share"><div class="social-share" data-image="https://tva1.sinaimg.cn/large/0076tTSdgy1gm1w5asvegj32nk1404qr.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/01/05/Linux%E7%BB%88%E7%AB%AF%E4%BB%A3%E7%90%86/"><img class="next-cover" src="https://tvax2.sinaimg.cn/large/0076tTSdgy1gmd2ua9pq9j311e0ir7to.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Linux终端代理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/01/05/Unix-C-虚拟内存/" title="Unix C - 虚拟内存"><img class="cover" src="https://tvax1.sinaimg.cn/large/0076tTSdgy1gmc6a1kw1sj30jc0fuq55.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-01-05</div><div class="title">Unix C - 虚拟内存</div></div></a></div><div><a href="/2021/01/05/Linux终端代理/" title="Linux终端代理"><img class="cover" src="https://tvax2.sinaimg.cn/large/0076tTSdgy1gmd2ua9pq9j311e0ir7to.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-01-05</div><div class="title">Linux终端代理</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">进程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">创建进程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><span class="toc-number">1.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%AA%E4%BB%A3%E7%A0%81"><span class="toc-number">1.1.2.</span> <span class="toc-text">伪代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fork-%E5%A4%B1%E8%B4%A5%E8%BF%94%E5%9B%9E-1%E7%9A%84%E6%9D%A1%E4%BB%B6"><span class="toc-number">1.1.3.</span> <span class="toc-text">fork() 失败返回-1的条件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%90%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%88%B6%E8%BF%9B%E7%A8%8B%E7%9A%84%E8%81%94%E7%B3%BB"><span class="toc-number">1.1.4.</span> <span class="toc-text">子进程与父进程的联系</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#vfork-%E4%B8%8Efork-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.1.5.</span> <span class="toc-text">vfork()与fork()的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%99%E6%97%B6%E6%8B%B7%E8%B4%9D-copy-on-write"><span class="toc-number">1.1.5.1.</span> <span class="toc-text">写时拷贝(copy-on-write)</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.6.</span> <span class="toc-text">使用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#fork"><span class="toc-number">1.1.6.1.</span> <span class="toc-text">fork()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#vfork"><span class="toc-number">1.1.6.2.</span> <span class="toc-text">vfork()</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E7%BB%88%E6%AD%A2"><span class="toc-number">1.2.</span> <span class="toc-text">进程终止</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A3%E5%B8%B8%E7%BB%88%E6%AD%A2-%E4%BB%8Emain%E5%87%BD%E6%95%B0%E4%B8%AD%E8%BF%94%E5%9B%9E"><span class="toc-number">1.2.1.</span> <span class="toc-text">正常终止(从main函数中返回)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA%E5%90%8E%E7%9A%84%E8%B5%84%E6%BA%90%E5%A4%84%E7%90%86"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">进程退出后的资源处理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">相关函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">进程退出函数调用过程</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%BC%82%E5%B8%B8%E7%BB%88%E6%AD%A2"><span class="toc-number">1.2.2.</span> <span class="toc-text">进程的异常终止</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E4%BF%A1%E5%8F%B7"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">常见错误信号:</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E6%94%B6%E5%AD%90%E8%BF%9B%E7%A8%8B-%E5%83%B5%E5%B0%B8"><span class="toc-number">1.3.</span> <span class="toc-text">回收子进程(僵尸)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0-1"><span class="toc-number">1.3.1.</span> <span class="toc-text">相关函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%AD%89%E5%BE%85%E5%B9%B6%E5%9B%9E%E6%94%B6%E4%BB%BB%E6%84%8F%E5%AD%90%E8%BF%9B%E7%A8%8B-%E9%98%BB%E5%A1%9E"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">等待并回收任意子进程(阻塞)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%88%E6%AD%A2%E7%8A%B6%E6%80%81-status%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">分析进程的终止状态(status参数)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%AD%89%E5%BE%85%E5%B9%B6%E5%9B%9E%E6%94%B6%E4%BB%BB%E6%84%8F%E6%88%96%E7%89%B9%E5%AE%9A%E5%AD%90%E8%BF%9B%E7%A8%8B-%E5%8F%AF%E9%80%89%E6%8B%A9%E6%98%AF%E5%90%A6%E9%98%BB%E5%A1%9E"><span class="toc-number">1.3.1.3.</span> <span class="toc-text">等待并回收任意或特定子进程(可选择是否阻塞)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%96%B0%E8%BF%9B%E7%A8%8B-exec%E5%87%BD%E6%95%B0%E6%97%8F"><span class="toc-number">1.4.</span> <span class="toc-text">创建新进程(exec函数族)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#exec%E4%B8%8Efork%E5%8C%BA%E5%88%AB"><span class="toc-number">1.4.1.</span> <span class="toc-text">exec与fork区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exec%E5%88%9B%E5%BB%BA%E6%96%B0%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%8F%98%E5%8C%96%E4%B8%8E%E5%BB%B6%E7%BB%AD"><span class="toc-number">1.4.2.</span> <span class="toc-text">exec创建新进程的变化与延续</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%98%E5%8C%96%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="toc-number">1.4.2.1.</span> <span class="toc-text">变化的属性</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BB%A7%E6%89%BF%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="toc-number">1.4.2.2.</span> <span class="toc-text">继承的属性</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exec-vfork%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.4.3.</span> <span class="toc-text">exec + vfork模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0-2"><span class="toc-number">1.4.4.</span> <span class="toc-text">相关函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#execl"><span class="toc-number">1.4.4.1.</span> <span class="toc-text">execl()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#execlp"><span class="toc-number">1.4.4.2.</span> <span class="toc-text">execlp()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#execle"><span class="toc-number">1.4.4.3.</span> <span class="toc-text">execle()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#execv"><span class="toc-number">1.4.4.4.</span> <span class="toc-text">execv()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#execvp"><span class="toc-number">1.4.4.5.</span> <span class="toc-text">execvp()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#execve"><span class="toc-number">1.4.4.6.</span> <span class="toc-text">execve()</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#system"><span class="toc-number">1.5.</span> <span class="toc-text">system()</span></a></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 34hz</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="translateLink" type="button" title="简繁转换">簡</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="/js/mirror.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="70" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-show-text.min.js" data-mobile="false" data-text="小  刘,小  王,十  一" data-fontsize="15px" data-random="true" async="async"></script><div class="GalMenu GalDropDown"><div class="circle" id="gal"><div class="ring"><a class="menuItem" href="/"><span>首页</span></a><a class="menuItem" href="/comments/"><span>留言板</span></a><a class="menuItem" href="/tags/"><span>标签</span></a><a class="menuItem" href="javascript:void(0);" onclick="Mirror()"><span>Gitee镜像站</span></a><a class="menuItem" href="/link/"><span>友人帐</span></a><a class="menuItem" href="/archives/"><span>时间轴</span></a><a class="menuItem" href="javascript:void(0);" onclick="Mirror2()"><span>刷新</span></a></div></div><audio id="audio" src="https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@v3.3.3_3/galmenu/galmenu.mp3"></audio></div><script defer="defer" src="https://cdn.jsdelivr.net/gh/Akilarlxh/Akilarlxh.github.io@bf_3.3.0_12/js/custom/galmenu.min.js"></script></div></body></html>
